@@ -1,0 +1,158 @@
+import dotenv from "dotenv";
+dotenv.config();
+
+import express from "express";
+import mongoose from "mongoose";
+import cors from "cors";
+import session from "express-session";
+import MongoStore from "connect-mongo";
+import cookieParser from "cookie-parser";
+
+import mailRoutes from "./routes/mail.js";
+import adminAuthRoutes from "./routes/adminAuth.js";
+import adminAuthMiddleware from "./middleware/adminAuthMiddleware.js";
+import { adminIpAccessMiddleware } from "./middleware/adminIpMiddleware.js";
+import titleSettingsRoutes from "./routes/titleSettingsRoutes.js";
+import uploadRoutes from "./routes/upload.routes.js";
+import path from "path";
+
+const app = express();
+
+const uri =
+    "mongodb://Admin:admin000@ac-pdfiens-shard-00-00.enppv4j.mongodb.net:27017,ac-pdfiens-shard-00-01.enppv4j.mongodb.net:27017,ac-pdfiens-shard-00-02.enppv4j.mongodb.net:27017/websiteCMS?ssl=true&replicaSet=atlas-8yzfuv-shard-0&authSource=admin&retryWrites=true&w=majority&appName=Cluster0";
+
+app.set("trust proxy", 1);
+
+app.use(
+    cors({
+        origin: [
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+            "http://192.168.1.25:5173",
+        ],
+        credentials: true,
+    })
+);
+
+app.use(cookieParser());
+app.use(express.json({ limit: "10mb" }));
+
+app.use(
+    session({
+        name: "admin_sid",
+        secret: process.env.SESSION_SECRET,
+        resave: false,
+        saveUninitialized: false,
+        store: MongoStore.create({
+            mongoUrl: uri,
+            collectionName: "sessions",
+        }),
+        cookie: {
+            httpOnly: true,
+            secure: false,
+            sameSite: "lax",
+        },
+    })
+);
+
+app.use("/api/mail", mailRoutes);
+app.use("/api/admin-auth", adminAuthRoutes);
+
+mongoose
+    .connect(uri)
+    .then(() => {
+        console.log("SESSION_SECRET:", process.env.SESSION_SECRET);
+        console.log("✅ MongoDB Atlas'a bağlandı");
+
+        app.listen(5000, "0.0.0.0", () => {
+            console.log("🚀 Server running on port 5000");
+        });
+    })
+    .catch((err) => {
+        console.error("❌ MongoDB bağlantı hatası:", err.message);
+    });
+
+app.get("/api/pages", async (req, res) => {
+    try {
+        const collections = await mongoose.connection.db.listCollections().toArray();
+
+        const pages = collections
+            .map((collection) => collection.name)
+            .filter(
+                (name) =>
+                    !name.startsWith("system.") &&
+                    name !== "sessions" &&
+                    name !== "adminusers"
+            )
+            .map((name) => ({ name }));
+
+        res.json(pages);
+    } catch (error) {
+        console.error("❌ Collection listesi alınamadı:", error.message);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get("/api/pages/:name", async (req, res) => {
+    try {
+        const collectionName = req.params.name;
+
+        const doc = await mongoose.connection.db.collection(collectionName).findOne({});
+
+        if (!doc) {
+            return res.status(404).json({ error: "Bu collection içinde veri yok." });
+        }
+
+        res.json(doc);
+    } catch (error) {
+        console.error("❌ Sayfa detayı alınamadı:", error.message);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.put(
+    "/api/pages/:name",
+    adminIpAccessMiddleware,
+    adminAuthMiddleware,
+    async (req, res) => {
+        try {
+            const collectionName = req.params.name;
+            const { sections } = req.body;
+
+            if (!Array.isArray(sections)) {
+                return res.status(400).json({ error: "sections array olmalı." });
+            }
+
+            const collection = mongoose.connection.db.collection(collectionName);
+            const existingDoc = await collection.findOne({});
+
+            if (!existingDoc) {
+                return res.status(404).json({ error: "Güncellenecek belge bulunamadı." });
+            }
+
+            const result = await collection.updateOne(
+                { _id: existingDoc._id },
+                { $set: { sections } }
+            );
+
+            if (result.matchedCount === 0) {
+                return res.status(404).json({ error: "Belge eşleşmedi." });
+            }
+
+            const updatedDoc = await collection.findOne({ _id: existingDoc._id });
+
+            res.json({
+                message: "Belge başarıyla güncellendi.",
+                data: updatedDoc,
+            });
+        } catch (error) {
+            console.error("❌ Güncelleme hatası:", error.message);
+            res.status(500).json({ error: error.message });
+        }
+    }
+);
+
+app.use("/api", titleSettingsRoutes);
+
+app.use("/api/upload", uploadRoutes);
+app.use("/images", express.static(path.join(process.cwd(), "public", "images")));
