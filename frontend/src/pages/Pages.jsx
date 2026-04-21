@@ -5,7 +5,6 @@ import Home from "./Home";
 import Contact from "./Contact";
 import Career from "./Career";
 import AdminPanel from "./AdminPanel";
-import AdminLogin from "./AdminLogin";
 import KvkkPage from "./KvkkPage"
 import AdminProtectedRoute from "./AdminProtectedRoute";
 import AboutPage from "./AboutPage";
@@ -40,15 +39,6 @@ const Pages = () => {
           element={
             <AdminProtectedRoute>
               <AdminPanel />
-            </AdminProtectedRoute>
-          }
-        />
-        <Route path="/admin-login" element={<AdminLogin />} />
-        <Route
-          path="/admin"
-          element={
-            <AdminProtectedRoute>
-              <div>Admin page</div>
             </AdminProtectedRoute>
           }
         />
