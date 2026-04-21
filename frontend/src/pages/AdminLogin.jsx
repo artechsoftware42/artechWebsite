@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Eye, EyeOff, User, Lock, ShieldCheck } from "lucide-react";
 import { loginAdmin } from "../services/adminAuthService";
+import { useNavigate } from "react-router-dom";
 
 const AdminLogin = () => {
     const [showPassword, setShowPassword] = useState(false);
@@ -10,6 +11,7 @@ const AdminLogin = () => {
     });
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
+    const navigate = useNavigate();
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -26,11 +28,21 @@ const AdminLogin = () => {
         setMessage("");
 
         try {
-            const data = await loginAdmin(formData);
+            const cleanFormData = {
+                username: formData.username.trim(),
+                password: formData.password,
+            };
+
+            const data = await loginAdmin(cleanFormData);
 
             if (data.success) {
                 setMessage("Login successful.");
-                window.location.href = "/admin";
+                navigate("/admin", { replace: true });
+
+            } if (!formData.username || !formData.password) {
+                setMessage("Kullanıcı adı ve şifre zorunlu.");
+                setLoading(false);
+                return;
             } else {
                 setMessage(data.message || "Login failed.");
             }
