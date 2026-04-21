@@ -53,8 +53,9 @@ app.use(
         }),
         cookie: {
             httpOnly: true,
-            secure: false,
-            sameSite: "lax",
+            secure: true,
+            sameSite: "none",
+            maxAge: 1000 * 60 * 30,
         },
     })
 );
