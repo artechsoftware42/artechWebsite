@@ -22,13 +22,21 @@ const isProduction = process.env.NODE_ENV === "production";
 
 app.set("trust proxy", 1);
 
+const allowedOrigins = [
+    process.env.FRONTEND_URL,
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://192.168.1.37:5173",
+].filter(Boolean);
+
 app.use(
     cors({
-        origin: [
-            "http://localhost:5173",
-            "http://127.0.0.1:5173",
-            "http://192.168.1.37:5173",
-        ],
+        origin: function (origin, callback) {
+            if (!origin || allowedOrigins.includes(origin)) {
+                return callback(null, true);
+            }
+            return callback(new Error("CORS hatası: origin izinli değil"));
+        },
         credentials: true,
     })
 );
