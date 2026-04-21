@@ -11,15 +11,14 @@ import cookieParser from "cookie-parser";
 import mailRoutes from "./routes/mail.js";
 import adminAuthRoutes from "./routes/adminAuth.js";
 import adminAuthMiddleware from "./middleware/adminAuthMiddleware.js";
-import { adminIpAccessMiddleware } from "./middleware/adminIpMiddleware.js";
 import titleSettingsRoutes from "./routes/titleSettingsRoutes.js";
 import uploadRoutes from "./routes/upload.routes.js";
 import path from "path";
 
 const app = express();
 
-const uri =
-    "mongodb://Admin:admin000@ac-pdfiens-shard-00-00.enppv4j.mongodb.net:27017,ac-pdfiens-shard-00-01.enppv4j.mongodb.net:27017,ac-pdfiens-shard-00-02.enppv4j.mongodb.net:27017/websiteCMS?ssl=true&replicaSet=atlas-8yzfuv-shard-0&authSource=admin&retryWrites=true&w=majority&appName=Cluster0";
+const uri = process.env.MONGO_URI;
+const isProduction = process.env.NODE_ENV === "production";
 
 app.set("trust proxy", 1);
 
@@ -28,7 +27,7 @@ app.use(
         origin: [
             "http://localhost:5173",
             "http://127.0.0.1:5173",
-            "http://192.168.1.25:5173",
+            "http://192.168.1.37:5173",
         ],
         credentials: true,
     })
@@ -61,11 +60,12 @@ app.use("/api/admin-auth", adminAuthRoutes);
 mongoose
     .connect(uri)
     .then(() => {
-        console.log("SESSION_SECRET:", process.env.SESSION_SECRET);
         console.log("✅ MongoDB Atlas'a bağlandı");
 
-        app.listen(5000, "0.0.0.0", () => {
-            console.log("🚀 Server running on port 5000");
+        const PORT = process.env.PORT || 5000;
+
+        app.listen(PORT, "0.0.0.0", () => {
+            console.log(`🚀 Server running on port ${PORT}`);
         });
     })
     .catch((err) => {
@@ -112,7 +112,6 @@ app.get("/api/pages/:name", async (req, res) => {
 
 app.put(
     "/api/pages/:name",
-    adminIpAccessMiddleware,
     adminAuthMiddleware,
     async (req, res) => {
         try {
