@@ -29,6 +29,7 @@ export async function getMailSettings() {
         resendApiKey: getValue("resendApiKey"),
         contactFrom: getValue("contactFrom"),
         careerFrom: getValue("careerFrom"),
+        offerFrom: getValue("offerFrom", getValue("contactFrom")),
         mailTo: getValue("mailTo"),
     };
 }

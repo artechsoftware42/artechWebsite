@@ -105,3 +105,58 @@ export async function sendCareerMail(data, file) {
         throw error;
     }
 }
+
+export async function sendOfferMail(data) {
+    try {
+        const { resendApiKey, offerFrom, mailTo } = await getMailSettings();
+        const resend = new Resend(resendApiKey);
+
+        const {
+            selectedOption,
+            companyName,
+            email,
+            phone,
+            details,
+        } = data;
+
+        const response = await resend.emails.send({
+            from: offerFrom,
+            to: mailTo,
+            subject: `Teklif Talebi - ${companyName || "Yeni Talep"}`,
+            html: `
+        <div style="font-family: Arial, sans-serif; color: #222; line-height: 1.6;">
+          <h1 style="margin-bottom: 20px;">Yeni Teklif Talebi</h1>
+
+          <table style="border-collapse: collapse; width: 100%; max-width: 700px;">
+            <tr>
+              <td style="border: 1px solid #ddd; padding: 8px;"><strong>Talep Türü</strong></td>
+              <td style="border: 1px solid #ddd; padding: 8px;">${selectedOption || "-"}</td>
+            </tr>
+            <tr>
+              <td style="border: 1px solid #ddd; padding: 8px;"><strong>Şirket Adı</strong></td>
+              <td style="border: 1px solid #ddd; padding: 8px;">${companyName || "-"}</td>
+            </tr>
+            <tr>
+              <td style="border: 1px solid #ddd; padding: 8px;"><strong>E-posta</strong></td>
+              <td style="border: 1px solid #ddd; padding: 8px;">${email || "-"}</td>
+            </tr>
+            <tr>
+              <td style="border: 1px solid #ddd; padding: 8px;"><strong>Telefon</strong></td>
+              <td style="border: 1px solid #ddd; padding: 8px;">${phone || "-"}</td>
+            </tr>
+          </table>
+
+          <h2 style="margin-top: 24px;">Talep Detayı</h2>
+          <div style="border: 1px solid #ddd; padding: 12px; background: #fafafa; max-width: 700px; white-space: pre-wrap;">
+            ${details || "-"}
+          </div>
+        </div>
+      `,
+        });
+
+        return response;
+    } catch (error) {
+        console.error("Offer mail hatası:", error);
+        throw error;
+    }
+}

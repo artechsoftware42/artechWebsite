@@ -1,5 +1,5 @@
 import express from "express";
-import { sendContactMail, sendCareerMail } from "../specials/mailSender.js";
+import { sendContactMail, sendCareerMail, sendOfferMail } from "../specials/mailSender.js";
 import multer from "multer";
 
 const router = express.Router();
@@ -125,6 +125,40 @@ router.post("/send-career-mail", upload.single("file"), async (req, res) => {
     } catch (error) {
         console.error("Career mail hatası:", error.message || error);
         res.status(500).json({ error: "Career mail gönderilemedi" });
+    }
+});
+
+/* =========================
+   OFFER MAIL
+========================= */
+router.post("/send-offer-mail", async (req, res) => {
+    try {
+        const {
+            selectedOption,
+            companyName,
+            email,
+            phone,
+            details,
+        } = req.body;
+
+        await sendOfferMail({
+            selectedOption,
+            companyName,
+            email,
+            phone,
+            details,
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Offer mail başarıyla gönderildi.",
+        });
+    } catch (error) {
+        console.error("Offer mail route hatası:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Offer mail gönderilemedi.",
+        });
     }
 });
 
