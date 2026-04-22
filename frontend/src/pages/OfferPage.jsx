@@ -4,6 +4,7 @@ import { X, Check, ChevronLeft, ChevronRight } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useLanguage } from "../context/LanguageContext";
 import { fetchJson } from "../utils/fetchJson";
+import { sendOfferMail } from "../services/offerMailService";
 
 const getLocalizedValue = (contents, key, language, fallback) => {
   const found = contents.find((item) => item.key === key)?.value;
@@ -157,7 +158,22 @@ function OfferPage() {
       }
 
       setKvkkError(false);
-      setIsSubmitted(true);
+
+      try {
+        await sendOfferMail({
+          selectedOption,
+          companyName,
+          email,
+          phone,
+          details,
+        });
+
+        setIsSubmitted(true);
+      } catch (error) {
+        console.error("Offer form hatası:", error);
+        alert("Teklif formu gönderilemedi.");
+      }
+
       return;
     }
   };
