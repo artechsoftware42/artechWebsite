@@ -1196,7 +1196,7 @@ const AdminPanel = () => {
                                     onChange={(e) => {
                                         updateSections((copy) => {
                                             const item = copy[sectionIndex].contents[contentIndex].value[menuIndex];
-                                            if (!isPlainObject(item.title)) item.title = { tr: "", en: "" };
+                                            if (!isPlainObject(item.title)) item.title = { tr: "", en: "", fr: "", ru: "" };
                                             item.title.tr = e.target.value;
                                             if (!item.link || item.link === "/") {
                                                 item.link = "/" + slugify(e.target.value || "");
@@ -1213,8 +1213,40 @@ const AdminPanel = () => {
                                     onChange={(e) => {
                                         updateSections((copy) => {
                                             const item = copy[sectionIndex].contents[contentIndex].value[menuIndex];
-                                            if (!isPlainObject(item.title)) item.title = { tr: "", en: "" };
+                                           if (!isPlainObject(item.title)) item.title = { tr: "", en: "", fr: "", ru: "" };
                                             item.title.en = e.target.value;
+                                        });
+                                    }}
+                                    style={inputStyle}
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="Français title"
+                                    value={menu.title?.fr || ""}
+                                    onChange={(e) => {
+                                        updateSections((copy) => {
+                                            const item = copy[sectionIndex].contents[contentIndex].value[menuIndex];
+                                            if (!isPlainObject(item.title)) item.title = { tr: "", en: "", fr: "", ru: "" };
+                                            item.title.fr = e.target.value;
+                                            if (!item.link || item.link === "/") {
+                                                item.link = "/" + slugify(e.target.value || "");
+                                            }
+                                        });
+                                    }}
+                                    style={inputStyle}
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="Русский title"
+                                    value={menu.title?.ru || ""}
+                                    onChange={(e) => {
+                                        updateSections((copy) => {
+                                            const item = copy[sectionIndex].contents[contentIndex].value[menuIndex];
+                                            if (!isPlainObject(item.title)) item.title = { tr: "", en: "", fr: "", ru: "" };
+                                            item.title.ru = e.target.value;
+                                            if (!item.link || item.link === "/") {
+                                                item.link = "/" + slugify(e.target.value || "");
+                                            }
                                         });
                                     }}
                                     style={inputStyle}
