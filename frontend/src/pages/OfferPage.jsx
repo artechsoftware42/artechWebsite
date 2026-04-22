@@ -96,7 +96,7 @@ function OfferPage() {
     setStep((prev) => prev - 1);
   };
 
-  const goToNextStep = () => {
+  const goToNextStep = async () => {
     if (isSubmitted) return;
 
     if (step === 1) {
