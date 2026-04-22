@@ -153,7 +153,13 @@ export async function sendOfferMail(data) {
         </div>
       `,
         });
+        if (response?.error) {
+            console.error("RESEND OFFER ERROR:", response.error);
+            throw new Error(response.error.message || "Resend error");
+        }
 
+        console.log("RESEND OFFER SUCCESS:", response);
+        
         return response;
     } catch (error) {
         console.error("Offer mail hatası:", error);

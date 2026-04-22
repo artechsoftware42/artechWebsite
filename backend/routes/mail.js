@@ -133,6 +133,8 @@ router.post("/send-career-mail", upload.single("file"), async (req, res) => {
 ========================= */
 router.post("/send-offer-mail", async (req, res) => {
     try {
+        console.log("OFFER BODY:", req.body);
+
         const {
             selectedOption,
             companyName,
@@ -141,25 +143,30 @@ router.post("/send-offer-mail", async (req, res) => {
             details,
         } = req.body;
 
-        await sendOfferMail({
+        const result = await sendOfferMail({
             selectedOption,
             companyName,
             email,
             phone,
             details,
         });
+        console.log("OFFER MAIL SENT");
+        console.log("OFFER RESULT:", result);
 
         return res.status(200).json({
             success: true,
             message: "Offer mail başarıyla gönderildi.",
         });
     } catch (error) {
-        console.error("Offer mail route hatası:", error);
+        console.error("OFFER ERROR:", error);
+
         return res.status(500).json({
             success: false,
             message: "Offer mail gönderilemedi.",
         });
     }
 });
+
+
 
 export default router;
