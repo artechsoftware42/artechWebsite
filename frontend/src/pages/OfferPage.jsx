@@ -1,27 +1,25 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  X,
-  Check,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { X, Check, ChevronLeft, ChevronRight } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
-import l1 from "../../public/images/l1.png";
+import { useLanguage } from "../context/LanguageContext";
+import { fetchJson } from "../utils/fetchJson";
 
-const options = [
-  "Yazılım Geliştirme",
-  "Web Sitesi",
-  "Mobil Uygulama",
-  "CRM Sistemleri",
-  "ERP / MRP Programları",
-  "Stok Takibi Sistemleri",
-  "SEO / SEM",
-  "Savunma Sanayii",
-];
+const getLocalizedValue = (contents, key, language, fallback) => {
+  const found = contents.find((item) => item.key === key)?.value;
+
+  if (found && typeof found === "object" && !Array.isArray(found)) {
+    return found[language] ?? fallback;
+  }
+
+  return found ?? fallback;
+};
 
 function OfferPage() {
   const navigate = useNavigate();
+  const { language } = useLanguage();
+
+  const [contents, setContents] = useState([]);
 
   const [step, setStep] = useState(1);
   const [selectedOption, setSelectedOption] = useState("");
@@ -38,6 +36,38 @@ function OfferPage() {
   const [phoneError, setPhoneError] = useState(false);
   const [detailsError, setDetailsError] = useState(false);
   const [kvkkError, setKvkkError] = useState(false);
+
+  useEffect(() => {
+    const fetchOfferData = async () => {
+      try {
+        const data = await fetchJson(
+          `${import.meta.env.VITE_API_URL}/api/pages/OfferPage`
+        );
+        if (!data) return;
+
+        const offerSection = data.sections?.find(
+          (section) => section.name?.toLowerCase() === "offer"
+        );
+
+        if (offerSection) {
+          setContents(offerSection.contents || []);
+        }
+      } catch (error) {
+        console.error("OfferPage verisi alınamadı:", error);
+        setContents([]);
+      }
+    };
+
+    fetchOfferData();
+  }, []);
+
+  const getValue = (key, fallback = "") => {
+    return getLocalizedValue(contents, key, language, fallback);
+  };
+
+  const options =
+    contents.find((item) => item.key === "offerOptions")?.value?.[language] ||
+    [];
 
   const totalSteps = 5;
   const progressWidth = `${(step / totalSteps) * 100}%`;
@@ -250,7 +280,6 @@ function OfferPage() {
 
       <div className="min-h-screen bg-[#0d0d0d] text-white px-4 sm:px-6 lg:px-8">
         <div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col">
-          {/* TOP */}
           <div className="mx-auto flex w-full max-w-5xl items-center justify-between pt-6 sm:pt-8">
             <button
               onClick={handleLogoClick}
@@ -258,7 +287,7 @@ function OfferPage() {
               aria-label="Anasayfaya git"
             >
               <img
-                src={l1}
+                src={getValue("offerLogo", "/images/l1.png")}
                 alt="Logo"
                 className="h-10 w-auto select-none sm:h-12 md:h-14"
                 draggable={false}
@@ -274,7 +303,6 @@ function OfferPage() {
             </button>
           </div>
 
-          {/* SUBMITTED STATE */}
           {isSubmitted ? (
             <div className="flex flex-1 items-center justify-center py-10">
               <motion.div
@@ -290,11 +318,14 @@ function OfferPage() {
                 </div>
 
                 <h1 className="mb-3 text-3xl font-semibold text-white sm:text-4xl">
-                  Teşekkürler
+                  {getValue("offerSuccessTitle", "Teşekkürler")}
                 </h1>
 
                 <p className="mx-auto max-w-xl text-sm leading-7 text-white/65 sm:text-base">
-                  Talebiniz bize ulaştı. En kısa sürede sizinle iletişime geçeceğiz
+                  {getValue(
+                    "offerSuccessText",
+                    "Talebiniz bize ulaştı. En kısa sürede sizinle iletişime geçeceğiz"
+                  )}
                 </p>
 
                 <div className="mt-8">
@@ -302,14 +333,13 @@ function OfferPage() {
                     onClick={handleGoHome}
                     className="rounded-xl bg-[#02acfa] px-6 py-3 text-sm font-semibold text-white transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] sm:text-base cursor-pointer"
                   >
-                    Anasayfa
+                    {getValue("offerBackToHomeButton", "Anasayfa")}
                   </button>
                 </div>
               </motion.div>
             </div>
           ) : (
             <>
-              {/* CENTER */}
               <div className="flex flex-1 items-center justify-center py-10">
                 <div className="w-full max-w-5xl">
                   <AnimatePresence mode="wait">
@@ -317,7 +347,8 @@ function OfferPage() {
                       {step === 1 && (
                         <>
                           <h1 className="mb-10 text-left text-2xl font-semibold">
-                            1→ Size hangi konuda yardımcı olabiliriz? <span className="text-[#02acfa]">*</span>
+                            {getValue("offerStep1Title", "")}{" "}
+                            <span className="text-[#02acfa]">*</span>
                           </h1>
 
                           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -349,7 +380,10 @@ function OfferPage() {
                           <div className="relative mt-4 h-0">
                             {showError && (
                               <p className="absolute left-0 top-0 text-red-500">
-                                Lütfen bir alan seçin.
+                                {getValue(
+                                  "offerOptionRequiredError",
+                                  "Lütfen bir alan seçin."
+                                )}
                               </p>
                             )}
                           </div>
@@ -359,7 +393,8 @@ function OfferPage() {
                       {step === 2 && (
                         <>
                           <h1 className="mb-10 text-left text-2xl font-semibold">
-                            2→ Şirket Adınız <span className="text-[#02acfa]">*</span>
+                            {getValue("offerStep2Title", "")}{" "}
+                            <span className="text-[#02acfa]">*</span>
                           </h1>
 
                           <div className="relative w-full max-w-xl">
@@ -371,7 +406,10 @@ function OfferPage() {
                                 setCompanyError(false);
                               }}
                               onKeyDown={handleInputKeyDown}
-                              placeholder="Şirket veya marka adı"
+                              placeholder={getValue(
+                                "offerCompanyPlaceholder",
+                                "Şirket veya marka adı"
+                              )}
                               className="peer w-full bg-transparent py-3 text-white placeholder:text-white/40 outline-none"
                             />
 
@@ -380,7 +418,10 @@ function OfferPage() {
 
                             {companyError && (
                               <p className="absolute left-0 top-full mt-2 text-red-500">
-                                Şirket veya marka adı gerekli.
+                                {getValue(
+                                  "offerCompanyRequiredError",
+                                  "Şirket veya marka adı gerekli."
+                                )}
                               </p>
                             )}
                           </div>
@@ -390,7 +431,8 @@ function OfferPage() {
                       {step === 3 && (
                         <>
                           <h1 className="mb-10 text-left text-2xl font-semibold">
-                            3→ E-posta <span className="text-[#02acfa]">*</span>
+                            {getValue("offerStep3Title", "")}{" "}
+                            <span className="text-[#02acfa]">*</span>
                           </h1>
 
                           <div className="relative w-full max-w-xl">
@@ -402,7 +444,10 @@ function OfferPage() {
                                 setEmailError(false);
                               }}
                               onKeyDown={handleInputKeyDown}
-                              placeholder="ornek@firma.com"
+                              placeholder={getValue(
+                                "offerEmailPlaceholder",
+                                "ornek@firma.com"
+                              )}
                               className="peer w-full bg-transparent py-3 text-white placeholder:text-white/40 outline-none"
                             />
 
@@ -411,7 +456,10 @@ function OfferPage() {
 
                             {emailError && (
                               <p className="absolute left-0 top-full mt-2 text-red-500">
-                                Geçerli bir e-posta giriniz.
+                                {getValue(
+                                  "offerEmailRequiredError",
+                                  "Geçerli bir e-posta giriniz."
+                                )}
                               </p>
                             )}
                           </div>
@@ -421,7 +469,8 @@ function OfferPage() {
                       {step === 4 && (
                         <>
                           <h1 className="mb-10 text-left text-2xl font-semibold">
-                            4→ Telefon numaranız <span className="text-[#02acfa]">*</span>
+                            {getValue("offerStep4Title", "")}{" "}
+                            <span className="text-[#02acfa]">*</span>
                           </h1>
 
                           <div className="relative w-full max-w-xl">
@@ -433,7 +482,10 @@ function OfferPage() {
                                 setPhoneError(false);
                               }}
                               onKeyDown={handleInputKeyDown}
-                              placeholder="+90 5xx xxx xx xx"
+                              placeholder={getValue(
+                                "offerPhonePlaceholder",
+                                "+90 5xx xxx xx xx"
+                              )}
                               className="peer w-full bg-transparent py-3 text-white placeholder:text-white/40 outline-none"
                             />
 
@@ -442,7 +494,10 @@ function OfferPage() {
 
                             {phoneError && (
                               <p className="absolute left-0 top-full mt-2 text-red-500">
-                                Geçerli bir telefon numarası giriniz.
+                                {getValue(
+                                  "offerPhoneRequiredError",
+                                  "Geçerli bir telefon numarası giriniz."
+                                )}
                               </p>
                             )}
                           </div>
@@ -452,7 +507,8 @@ function OfferPage() {
                       {step === 5 && (
                         <>
                           <h1 className="mb-10 text-left text-2xl font-semibold">
-                            5→ Bu son! Talebiniz hakkında detayları belirtin. <span className="text-[#02acfa]">*</span>
+                            {getValue("offerStep5Title", "")}{" "}
+                            <span className="text-[#02acfa]">*</span>
                           </h1>
 
                           <div className="relative w-full max-w-2xl">
@@ -466,7 +522,10 @@ function OfferPage() {
                                 }
                               }}
                               onKeyDown={handleTextareaKeyDown}
-                              placeholder="kapsam, hedefler, zaman"
+                              placeholder={getValue(
+                                "offerDetailsPlaceholder",
+                                "kapsam, hedefler, zaman"
+                              )}
                               rows={6}
                               className="offer-textarea-scroll w-full resize-none overflow-y-auto bg-transparent py-3 text-white placeholder:text-white/40 outline-none"
                             />
@@ -475,7 +534,10 @@ function OfferPage() {
                             <div className="absolute bottom-[0px] left-0 h-[2px] w-0 bg-[#02acfa] transition-all duration-300 focus-within:w-full" />
 
                             <p className="mt-3 text-xs text-white/45">
-                              Shift ⇧ + Enter ↵ satır atlar.
+                              {getValue(
+                                "offerDetailsHint",
+                                "Shift ⇧ + Enter ↵ satır atlar."
+                              )}
                             </p>
 
                             <label className="mt-4 flex cursor-pointer items-start gap-3">
@@ -495,22 +557,30 @@ function OfferPage() {
                                   onClick={() => navigate("/kvkk")}
                                   className="text-[#02acfa] transition-opacity duration-300 hover:opacity-80 cursor-pointer"
                                 >
-                                  KVKK Aydınlatma Metni
+                                  {getValue("offerKvkkLinkText", "KVKK Aydınlatma Metni")}
                                 </button>
-                                'ni okudum, kişisel verilerimin işlenmesini kabul
-                                ediyorum.
+                                {getValue(
+                                  "offerKvkkTextSuffix",
+                                  "'ni okudum, kişisel verilerimin işlenmesini kabul ediyorum."
+                                )}
                               </span>
                             </label>
 
                             {detailsError && (
                               <p className="absolute left-0 top-full mt-2 text-red-500">
-                                Lütfen talebiniz hakkında biraz daha detay yazın.
+                                {getValue(
+                                  "offerDetailsRequiredError",
+                                  "Lütfen talebiniz hakkında biraz daha detay yazın."
+                                )}
                               </p>
                             )}
 
                             {kvkkError && (
                               <p className="absolute left-0 top-full mt-2 text-red-500">
-                                KVKK onayını işaretlemeniz gerekir.
+                                {getValue(
+                                  "offerKvkkRequiredError",
+                                  "KVKK onayını işaretlemeniz gerekir."
+                                )}
                               </p>
                             )}
                           </div>
@@ -519,23 +589,23 @@ function OfferPage() {
                     </motion.div>
                   </AnimatePresence>
 
-                  {/* ORTAK BUTTON */}
                   <div className="mt-4 flex flex-wrap items-center justify-end gap-x-3 gap-y-2">
                     <span className="text-xs text-white/45">
-                      Enter ↵’a bas
+                      {getValue("offerEnterHint", "Enter ↵’a bas")}
                     </span>
 
                     <button
                       onClick={goToNextStep}
                       className="rounded-xl bg-[#02acfa] px-6 py-3 text-sm font-semibold text-white transition-all duration-300 hover:scale-[1.03] cursor-pointer"
                     >
-                      {step === 5 ? "Gönder" : "İlerle"}
+                      {step === 5
+                        ? getValue("offerSubmitButton", "Gönder")
+                        : getValue("offerNextButton", "İlerle")}
                     </button>
                   </div>
                 </div>
               </div>
 
-              {/* PROGRESS */}
               <div className="mx-auto w-full max-w-5xl pb-6">
                 <div className="mb-2 flex items-center justify-between">
                   <span className="text-sm text-white/35">
