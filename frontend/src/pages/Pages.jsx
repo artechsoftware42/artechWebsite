@@ -45,7 +45,6 @@ const Pages = () => {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/projects" element={<ProjectsPage />} />
         <Route path="/kurumsal" element={<Company />} />
-        <Route path="*" element={<NotFoundPage />} />
       </Routes>
 
       {!isAdminPage && <Footer />}
