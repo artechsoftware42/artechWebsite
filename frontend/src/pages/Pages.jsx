@@ -5,19 +5,19 @@ import Home from "./Home";
 import Contact from "./Contact";
 import Career from "./Career";
 import AdminPanel from "./AdminPanel";
-import KvkkPage from "./KvkkPage"
+import KvkkPage from "./KvkkPage";
 import AdminProtectedRoute from "./AdminProtectedRoute";
 import AboutPage from "./AboutPage";
 import ProjectsPage from "./ProjectsPage";
 import ScrollToTop from "../components/ScrollToTop/ScrollToTop";
-
 import Company from "./Company";
+import NotFoundPage from "./NotFoundPage";
+
 /* COMPONENTS */
 import Header from "../components/Header/Header";
 import Footer from "../components/Footer/Footer";
 
 import { Routes, Route, useLocation } from "react-router-dom";
-
 
 const Pages = () => {
   const location = useLocation();
@@ -45,6 +45,7 @@ const Pages = () => {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/projects" element={<ProjectsPage />} />
         <Route path="/kurumsal" element={<Company />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
 
       {!isAdminPage && <Footer />}

@@ -13,10 +13,10 @@ function App() {
     <ErrorBoundary>
       <LanguageProvider>
         <Routes>
-          <Route path="/*" element={<Pages />} />
           <Route path="/rrq-s12-oec41-i25-9al-awk5-8zyb0" element={<AdminLogin />} />
-          <Route path="/404" element={<NotFoundPage />} />
           <Route path="/offer" element={<OfferPage />} />
+          <Route path="/*" element={<Pages />} />
+          <Route path="/404" element={<NotFoundPage />} />
         </Routes>
       </LanguageProvider>
     </ErrorBoundary>
