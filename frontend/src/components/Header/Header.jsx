@@ -28,11 +28,11 @@ const normalizeMenuItems = (items, language) => {
     title: getLocalizedValue(item.title, language, ""),
     submenu: Array.isArray(item.submenu)
       ? item.submenu.map((sub, subIndex) => ({
-        ...sub,
-        _id: sub._id ?? `${index}-${subIndex}`,
-        title: getLocalizedValue(sub.title, language, ""),
-        desc: getLocalizedValue(sub.desc, language, ""),
-      }))
+          ...sub,
+          _id: sub._id ?? `${index}-${subIndex}`,
+          title: getLocalizedValue(sub.title, language, ""),
+          desc: getLocalizedValue(sub.desc, language, ""),
+        }))
       : null,
   }));
 };
@@ -79,7 +79,9 @@ const Header = () => {
   useEffect(() => {
     const fetchHeader = async () => {
       try {
-        const data = await fetchJson(`${import.meta.env.VITE_API_URL}/api/pages/Header`);
+        const data = await fetchJson(
+          `${import.meta.env.VITE_API_URL}/api/pages/Header`
+        );
         if (!data) return;
 
         const section = data.sections?.find(
@@ -124,17 +126,21 @@ const Header = () => {
     return normalizeLanguages(contentMap.languages, language);
   }, [contentMap, language]);
 
-  const supportButton = useMemo(() => {
-    const support = contentMap.supportButton;
+  const offerButton = useMemo(() => {
+    const offer = contentMap.offerButton;
 
     return {
-      label: getLocalizedValue(support?.label, language, "DESTEK"),
-      href: support?.href || "mailto:artechsoftware@outlook.com",
+      label: getLocalizedValue(offer?.label, language, "TEKLİF AL"),
+      href: offer?.href || "/offer",
     };
   }, [contentMap, language]);
 
   const mobileLanguageTitle = useMemo(() => {
-    return getLocalizedValue(contentMap.mobileLanguageTitle, language, "Dil Seçimi");
+    return getLocalizedValue(
+      contentMap.mobileLanguageTitle,
+      language,
+      "Dil Seçimi"
+    );
   }, [contentMap, language]);
 
   const selectedLanguage = useMemo(() => {
@@ -187,10 +193,7 @@ const Header = () => {
 
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (
-        mobileLangRef.current &&
-        !mobileLangRef.current.contains(e.target)
-      ) {
+      if (mobileLangRef.current && !mobileLangRef.current.contains(e.target)) {
         setMobileLangOpen(false);
       }
     };
@@ -219,12 +222,13 @@ const Header = () => {
 
   return (
     <div
-      className={`fixed top-0 left-0 w-full h-[90px] z-[999] transition-all duration-500 ${isHome
-        ? header
-          ? "bg-[#0D0D0D] backdrop-blur-md"
-          : "bg-transparent"
-        : "bg-[#0D0D0D] backdrop-blur-md"
-        }`}
+      className={`fixed top-0 left-0 w-full h-[90px] z-[999] transition-all duration-500 ${
+        isHome
+          ? header
+            ? "bg-[#0D0D0D] backdrop-blur-md"
+            : "bg-transparent"
+          : "bg-[#0D0D0D] backdrop-blur-md"
+      }`}
     >
       <nav className="grid grid-cols-[auto_1fr_auto] items-center max-w-[1480px] mx-auto h-full px-4 md:px-6 gap-4">
         <Link to="/" className="z-[1001] flex items-center shrink-0">
@@ -261,9 +265,6 @@ const Header = () => {
                       className="flex items-center gap-2 px-4 py-2 rounded-xl text-[#e8e8e8] hover:bg-white/10 transition-all whitespace-nowrap"
                     >
                       {title}
-                      {submenu && (
-                        <FaChevronDown className="text-xs group-hover:rotate-180 transition-transform" />
-                      )}
                     </Link>
                   )
                 ) : (
@@ -358,8 +359,9 @@ const Header = () => {
                 {selectedLanguage?.short || "TR"}
               </span>
               <FaChevronDown
-                className={`text-xs shrink-0 transition-transform ${desktopLangOpen ? "rotate-180" : ""
-                  }`}
+                className={`text-xs shrink-0 transition-transform ${
+                  desktopLangOpen ? "rotate-180" : ""
+                }`}
               />
             </button>
 
@@ -378,10 +380,11 @@ const Header = () => {
                         key={lang.code}
                         type="button"
                         onClick={() => handleLanguageSelect(lang)}
-                        className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all text-left cursor-pointer ${selectedLanguage?.code === lang.code
-                          ? "bg-white/10"
-                          : "hover:bg-white/10"
-                          }`}
+                        className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all text-left cursor-pointer ${
+                          selectedLanguage?.code === lang.code
+                            ? "bg-white/10"
+                            : "hover:bg-white/10"
+                        }`}
                       >
                         {lang.flag ? (
                           <img
@@ -408,31 +411,34 @@ const Header = () => {
             </AnimatePresence>
           </div>
 
-          <a
-            href={supportButton.href}
+          <Link
+            to={offerButton.href}
             className="max-[940px]:hidden flex items-center gap-2 px-4 py-2 rounded-xl text-[#e8e8e8] hover:bg-white/10 transition-all cursor-pointer shrink-0"
           >
             <span className="font-medium whitespace-nowrap">
-              {supportButton.label}
+              {offerButton.label}
             </span>
             <BsArrowUpRight className="text-sm shrink-0" />
-          </a>
+          </Link>
 
           <div
             onClick={() => setMenuOpen(!menuOpen)}
             className="hidden max-[940px]:flex flex-col justify-center items-center gap-[6px] cursor-pointer z-[1001]"
           >
             <span
-              className={`w-7 h-[2px] bg-white transition-all ${menuOpen ? "rotate-45 translate-y-[8px]" : ""
-                }`}
+              className={`w-7 h-[2px] bg-white transition-all ${
+                menuOpen ? "rotate-45 translate-y-[8px]" : ""
+              }`}
             />
             <span
-              className={`w-7 h-[2px] bg-white transition-all ${menuOpen ? "opacity-0" : ""
-                }`}
+              className={`w-7 h-[2px] bg-white transition-all ${
+                menuOpen ? "opacity-0" : ""
+              }`}
             />
             <span
-              className={`w-7 h-[2px] bg-white transition-all ${menuOpen ? "-rotate-45 -translate-y-[8px]" : ""
-                }`}
+              className={`w-7 h-[2px] bg-white transition-all ${
+                menuOpen ? "-rotate-45 -translate-y-[8px]" : ""
+              }`}
             />
           </div>
         </div>
@@ -449,93 +455,96 @@ const Header = () => {
           >
             <div className="flex flex-col min-h-full">
               <div>
-                {menuItems.map(({ _id, title, link, submenu, external, url }, index) => (
-                  <motion.div
-                    key={_id}
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.08 }}
-                    className="mb-4"
-                  >
-                    {!submenu ? (
-                      external && url ? (
-                        <a
-                          href={url}
-                          target="_blank"
-                          rel="noreferrer"
-                          onClick={() => setMenuOpen(false)}
-                          className="text-2xl text-[#e8e8e8] font-semibold block py-2"
-                        >
-                          {title}
-                        </a>
-                      ) : (
-                        <Link
-                          to={link || "#"}
-                          onClick={() => setMenuOpen(false)}
-                          className="text-2xl text-[#e8e8e8] font-semibold block py-2"
-                        >
-                          {title}
-                        </Link>
-                      )
-                    ) : (
-                      <div>
-                        <div
-                          onClick={() =>
-                            setOpenSubmenu(openSubmenu === _id ? null : _id)
-                          }
-                          className="flex justify-between items-center text-2xl text-[#e8e8e8] font-semibold py-2 cursor-pointer"
-                        >
-                          {title}
-                          <span
-                            className={`transition-transform ${openSubmenu === _id ? "rotate-180" : ""
-                              }`}
+                {menuItems.map(
+                  ({ _id, title, link, submenu, external, url }, index) => (
+                    <motion.div
+                      key={_id}
+                      initial={{ opacity: 0, y: 30 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.08 }}
+                      className="mb-4"
+                    >
+                      {!submenu ? (
+                        external && url ? (
+                          <a
+                            href={url}
+                            target="_blank"
+                            rel="noreferrer"
+                            onClick={() => setMenuOpen(false)}
+                            className="text-2xl text-[#e8e8e8] font-semibold block py-2"
                           >
-                            <FaChevronDown />
-                          </span>
-                        </div>
-
-                        <AnimatePresence>
-                          {openSubmenu === _id && (
-                            <motion.div
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: "auto", opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              className="pl-4 overflow-hidden"
+                            {title}
+                          </a>
+                        ) : (
+                          <Link
+                            to={link || "#"}
+                            onClick={() => setMenuOpen(false)}
+                            className="text-2xl text-[#e8e8e8] font-semibold block py-2"
+                          >
+                            {title}
+                          </Link>
+                        )
+                      ) : (
+                        <div>
+                          <div
+                            onClick={() =>
+                              setOpenSubmenu(openSubmenu === _id ? null : _id)
+                            }
+                            className="flex justify-between items-center text-2xl text-[#e8e8e8] font-semibold py-2 cursor-pointer"
+                          >
+                            {title}
+                            <span
+                              className={`transition-transform ${
+                                openSubmenu === _id ? "rotate-180" : ""
+                              }`}
                             >
-                              {submenu.map((item, i) =>
-                                item.external ? (
-                                  <a
-                                    key={item._id ?? i}
-                                    href={item.url}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    onClick={() => setMenuOpen(false)}
-                                    className="flex items-center gap-2 py-2 text-lg text-gray-300 cursor-pointer"
-                                  >
-                                    <span>{item.title}</span>
-                                    <BsArrowUpRight className="text-sm shrink-0" />
-                                  </a>
-                                ) : (
-                                  <Link
-                                    key={item._id ?? i}
-                                    to={getSubmenuLink(item)}
-                                    onClick={() => {
-                                      setMenuOpen(false);
-                                      setOpenSubmenu(null);
-                                    }}
-                                    className="block py-2 text-lg text-gray-300 cursor-pointer"
-                                  >
-                                    {item.title}
-                                  </Link>
-                                )
-                              )}
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    )}
-                  </motion.div>
-                ))}
+                              <FaChevronDown />
+                            </span>
+                          </div>
+
+                          <AnimatePresence>
+                            {openSubmenu === _id && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: "auto", opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                className="pl-4 overflow-hidden"
+                              >
+                                {submenu.map((item, i) =>
+                                  item.external ? (
+                                    <a
+                                      key={item._id ?? i}
+                                      href={item.url}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      onClick={() => setMenuOpen(false)}
+                                      className="flex items-center gap-2 py-2 text-lg text-gray-300 cursor-pointer"
+                                    >
+                                      <span>{item.title}</span>
+                                      <BsArrowUpRight className="text-sm shrink-0" />
+                                    </a>
+                                  ) : (
+                                    <Link
+                                      key={item._id ?? i}
+                                      to={getSubmenuLink(item)}
+                                      onClick={() => {
+                                        setMenuOpen(false);
+                                        setOpenSubmenu(null);
+                                      }}
+                                      className="block py-2 text-lg text-gray-300 cursor-pointer"
+                                    >
+                                      {item.title}
+                                    </Link>
+                                  )
+                                )}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      )}
+                    </motion.div>
+                  )
+                )}
               </div>
 
               <div className="mt-auto pt-8 pb-8 space-y-4">
@@ -560,8 +569,9 @@ const Header = () => {
                         {selectedLanguage?.short || "TR"}
                       </span>
                       <FaChevronDown
-                        className={`transition-transform duration-300 ${mobileLangOpen ? "rotate-180" : ""
-                          }`}
+                        className={`transition-transform duration-300 ${
+                          mobileLangOpen ? "rotate-180" : ""
+                        }`}
                       />
                     </div>
                   </button>
@@ -581,10 +591,11 @@ const Header = () => {
                               key={lang.code}
                               type="button"
                               onClick={() => handleLanguageSelect(lang)}
-                              className={`w-full flex items-center justify-between gap-3 px-3 py-3 rounded-xl text-left transition-all mt-2 ${selectedLanguage?.code === lang.code
-                                ? "bg-white/10"
-                                : "hover:bg-white/5"
-                                }`}
+                              className={`w-full flex items-center justify-between gap-3 px-3 py-3 rounded-xl text-left transition-all mt-2 ${
+                                selectedLanguage?.code === lang.code
+                                  ? "bg-white/10"
+                                  : "hover:bg-white/5"
+                              }`}
                             >
                               <div className="flex items-center gap-3 min-w-0">
                                 {lang.flag ? (
@@ -618,15 +629,16 @@ const Header = () => {
                   </AnimatePresence>
                 </div>
 
-                <a
-                  href={supportButton.href}
+                <Link
+                  to={offerButton.href}
+                  onClick={() => setMenuOpen(false)}
                   className="flex items-center justify-between px-4 py-4 rounded-2xl border border-white/10 bg-black/90 backdrop-blur-xl text-[#e8e8e8] hover:bg-white/10 transition-all cursor-pointer"
                 >
                   <span className="font-semibold text-lg">
-                    {supportButton.label}
+                    {offerButton.label}
                   </span>
                   <BsArrowUpRight className="text-base shrink-0" />
-                </a>
+                </Link>
               </div>
             </div>
           </motion.div>
